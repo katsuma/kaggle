@@ -10,6 +10,8 @@ from sklearn import svm
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn import datasets, metrics
 from sklearn.cross_validation import train_test_split
+from sklearn.grid_search import GridSearchCV
+from sklearn.ensemble import RandomForestClassifier
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -21,25 +23,45 @@ features = np.array(train_csv[:, 1:feature_size])
 
 train_features, test_features, train_labels, test_labels = train_test_split(features, labels.ravel(), test_size=0.2, random_state=42)
 
-optimizer = tf.train.AdagradOptimizer(learning_rate=0.066)
-config = learn.python.learn.estimators.run_config.RunConfig()
+# optimizer = tf.train.AdagradOptimizer(learning_rate=0.066)
+# config = learn.python.learn.estimators.run_config.RunConfig()
+#
+# units = [64, 128, 64]
+# classifier = learn.DNNClassifier(
+#   hidden_units=units,
+#   n_classes=2,
+#   optimizer=optimizer,
+#   config=config
+# )
+#
+# started_time = time.time()
+# classifier.fit(train_features, train_labels, steps=1000, batch_size=32)
+# finished_time = time.time()
+#
+# test_pred = classifier.predict(test_features)
+# print(classification_report(test_labels, test_pred))
+# print(accuracy_score(test_labels, test_pred))
+# print("elapsed_time:{0} [sec]".format(finished_time - started_time))
 
-units = [64, 128, 64]
-classifier = learn.DNNClassifier(
-  hidden_units=units,
-  n_classes=2,
-  optimizer=optimizer,
-  config=config
-)
+parameters = {
+        'n_estimators'      : [10, 100, 300],
+        'max_features'      : [3, 10, 20],
+        'random_state'      : [0],
+        'n_jobs'            : [1],
+        'min_samples_split' : [10, 50, 100],
+        'max_depth'         : [3, 10, 50]
+}
 
+classifier = GridSearchCV(RandomForestClassifier(), parameters)
 started_time = time.time()
-classifier.fit(train_features, train_labels, steps=1000, batch_size=32)
+classifier.fit(train_features, train_labels)
 finished_time = time.time()
 
+print(classifier.best_estimator_)
 test_pred = classifier.predict(test_features)
 print(classification_report(test_labels, test_pred))
 print(accuracy_score(test_labels, test_pred))
-print("elapsed_time:{0} [sec]".format(finished_time - started_time))
+
 
 submit_test_csv = np.loadtxt("filtered_test.csv", skiprows=1, delimiter=',', dtype=float)
 submit_test_features = submit_test_csv[:,1:]
@@ -58,4 +80,4 @@ np.savetxt("submit.csv", submit_test_data, delimiter=",", fmt="%.0f", header="Pa
 #
 # avg / total       0.83      0.83      0.83       179
 #
-#
+# 0.832402234637
