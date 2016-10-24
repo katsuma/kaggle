@@ -58,4 +58,5 @@ np.savetxt("submit.csv", submit_test_data, delimiter=",", fmt="%.0f", header="Pa
 #
 # avg / total       0.83      0.83      0.83       179
 #
-#
+# 0.832402234637
+# elapsed_time:3.8553130626678467 [sec]
